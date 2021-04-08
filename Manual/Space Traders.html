@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <title>Space Traders — Keep Talking and Nobody Explodes Module</title>
+    <link rel="stylesheet" type="text/css" href="css/font.css">
+    <link rel="stylesheet" type="text/css" href="css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script src="js/ktane-utils.js"></script>
+</head>
+
+<body>
+    <div class="section" id="manual">
+        <div class="page page-bg-03">
+            <div class="page-header">
+                <span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+                <span class="page-header-section-title">Space Traders</span>
+            </div>
+            <div class="page-content">
+                <img src="img/Component/Module Name.svg" class="diagram" />
+                <h2>On the Subject of Space Traders</h2>
+
+                <p class="flavour-text">You are no longer a bomb defuser. You are now a SPACE TRADER!</p>
+            </div>
+            <div class="page-footer relative-footer" id="first-page-number">Page 1 of 3</div>
+        </div>
+    </div>
+</body>
+
+<script>
+    const data = [
+        "Achernar", "---------X",
+        "Acrux", "-------X-X",
+        "Adhara", "--------M-",
+        "Aldebaran", "----X--XC-",
+        "Alhena", "-------X--",
+        "Alioth", "-------XX-",
+        "Alkaid", "X-T----X--",
+        "Alnair", "--C-------",
+        "Alnilam", "X-X-------",
+        "Alnitak", "--X------X",
+        "Alphard", "X-X----XFX",
+        "Alpheratz", "--X---X-X-",
+        "Alsephina", "----I-----",
+        "Altair", "X-S--X--C-",
+        "Antares", "--------X-",
+        "Arcturus", "----------",
+        "Atria", "-XT-----RX",
+        "Avior", "X-----XX-X",
+        "Bellatrix", "M-X-------",
+        "Betelgeuse", "--F-----XX",
+        "Canopus", "X--X-----X",
+        "Capella", "-XX-X-FX-X",
+        "Castor", "------X-XI",
+        "Deneb", "X-X---XX--",
+        "Diphda", "--X-X--XX-",
+        "Dubhe", "---X---X-X",
+        "Elnath", "X-------E-",
+        "Fomalhaut", "-X------XX",
+        "Gacrux", "--X---X---",
+        "Hadar", "-XX---X-XI",
+        "Hamal", "X-XI--M---",
+        "Menkalinan", "------I-XX",
+        "Menkent", "--X------X",
+        "Miaplacidus", "-------XXX",
+        "Mimosa", "-X--X----X",
+        "Mirfak", "XX-------X",
+        "Mirzam", "--IF---X-B",
+        "Nunki", "--X-------",
+        "Peacock", "X---------",
+        "Pollux", "--X-------",
+        "Procyon", "---------X",
+        "Regulus", "--X-----XF",
+        "Rigel", "-X--------",
+        "Rigil Kentaurus", "X-----XX-X",
+        "Sargas", "----------",
+        "Sirius", "------XX--",
+        "Spica", "----X-----",
+        "Toliman", "--------X-",
+        "Vega", "XX-------X",
+        "Wezen", "--T------I",
+    ];
+
+    const STARS_PER_PAGE = 25;
+
+    const tablesCount = Math.ceil(data.length / STARS_PER_PAGE);
+    document.getElementById("first-page-number").innerText = `Page 1 of ${tablesCount + 1}`;
+    const manual = document.getElementById("manual");
+    for (let tableIndex = 0; tableIndex < tablesCount; tableIndex++) {
+        const page = manual.appendChild(document.createElement("div"));
+        page.className = `page page-bg-0${(tableIndex + 3) % 7 + 1}`;
+        const header = page.appendChild(document.createElement("div"));
+        header.className = "page-header";
+        const headerDocTitle = header.appendChild(document.createElement("span"));
+        headerDocTitle.className = "page-header-doc-title";
+        headerDocTitle.innerText = "Keep Talking and Nobody Explodes Mod";
+        const moduleName = header.appendChild(document.createElement("span"));
+        moduleName.className = "page-header-section-title";
+        moduleName.innerText = "Space Traders";
+        const content = page.appendChild(document.createElement("div"));
+        content.className = "page-content";
+        const pageNumber = page.appendChild(document.createElement("div"));
+        pageNumber.className = "page-footer relative-footer";
+        pageNumber.innerText = `Page ${tableIndex + 2} of ${tablesCount + 1}`;
+    }
+</script>
+
+</html>

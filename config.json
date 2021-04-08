@@ -1,0 +1,16 @@
+{
+	"Author": "NickLatkovich",
+	"Compatibility": "Compatible",
+	"DefuserDifficulty": "Medium",
+	"Description": "TODO",
+	"ExpertDifficulty": "Easy",
+	"ModuleID": "space_traders",
+	"Name": "Space Traders",
+	"Origin": "Mods",
+	"Published": "TODO",
+	"SortKey": "SPACETRADERS",
+	"SourceUrl": "https://github.com/nicklatkovich/ktane_space_traders",
+	"SteamID": "TODO",
+	"Symbol": "Sptr",
+	"Type": "Regular"
+}
