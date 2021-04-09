@@ -34,6 +34,7 @@ Models/*
 # SpaceTraders
 !Assets/Modules/SpaceTraders.meta
 !Assets/Modules/SpaceTraders
-!Manual/img/Component/SpaceTraders.svg
+!Manual/img/Component/Space Traders.svg
+!Manual/img/Space Traders/
 !Models/SpaceTraders.blend
 !Manual/pdfs/Modules/Space Traders.pdf
