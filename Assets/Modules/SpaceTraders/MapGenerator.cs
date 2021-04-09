@@ -111,6 +111,22 @@ public static class MapGenerator {
 		return result;
 	}
 
+	public static void GenerateMaxTaxAndGoodsToSoldCount(
+		HashSet<CellStar> starsSet, SpaceTradersModule module, out int maxTax, out int goodsToBeSoldCount
+	) {
+		CellStar[] stars = starsSet.Where((cell) => cell.edge).ToArray();
+		int[] maxPathsTaxes = stars.Select((s) => (
+			s.path.Where((p) => StarData.HasTaxOnGeneration(p, module)).Select((p) => p.tax).Sum())
+		).ToArray();
+		System.Array.Sort(maxPathsTaxes);
+		int i = maxPathsTaxes.Length / 2;
+		int _maxTax = maxPathsTaxes[i];
+		while (_maxTax == maxPathsTaxes[maxPathsTaxes.Length - 1] && i > 0) _maxTax = maxPathsTaxes[i--];
+		maxTax = _maxTax;
+		goodsToBeSoldCount = maxPathsTaxes.Where((tax) => tax <= _maxTax).Count();
+		if (goodsToBeSoldCount == stars.Count()) goodsToBeSoldCount -= 1;
+	}
+
 	private static void MarkEdges(HashSet<CellStar> starsSet) {
 		foreach (CellStar cell in starsSet) {
 			if (cell.adjacentStars.Count() < 2 && cell.name != SUN_NAME) cell.edge = true;
@@ -129,21 +145,5 @@ public static class MapGenerator {
 			int increasedTax = (expectedTaxPerPath - currentTax) % untaxedStarsCount;
 			foreach (CellStar untaxed in untaxedStars) untaxed.tax = minTax + (increasedTax-- > 0 ? 1 : 0);
 		}
-	}
-
-	private static void GenerateMaxTaxAndGoodsToSoldCount(
-		HashSet<CellStar> starsSet, SpaceTradersModule module, out int maxTax, out int goodsToBeSoldCount
-	) {
-		CellStar[] stars = starsSet.Where((cell) => cell.edge).ToArray();
-		int[] maxPathsTaxes = stars.Select((s) => (
-			s.path.Where((p) => StarData.CanHasTax(p, module)).Select((p) => p.tax).Sum())
-		).ToArray();
-		System.Array.Sort(maxPathsTaxes);
-		int i = maxPathsTaxes.Length / 2;
-		int _maxTax = maxPathsTaxes[i];
-		while (_maxTax == maxPathsTaxes[maxPathsTaxes.Length - 1] && i > 0) _maxTax = maxPathsTaxes[i--];
-		maxTax = _maxTax;
-		goodsToBeSoldCount = maxPathsTaxes.Where((tax) => tax <= _maxTax).Count();
-		if (goodsToBeSoldCount == stars.Count()) goodsToBeSoldCount -= 1;
 	}
 }

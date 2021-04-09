@@ -11,61 +11,59 @@
 	<script src="js/ktane-utils.js"></script>
 	<script>
 		const data = [
-			["Achernar", "F-S---TXXS"],
-			["Acrux", "-MXI--XXSI"],
-			["Adhara", "--X---X--X"],
-			["Aldebaran", "--S---XXSS"],
-			["Alhena", "T---X-XT-I"],
-			["Alioth", "CBX--X--XP"],
-			["Alkaid", "--X---XBXP"],
-			["Alnair", "--X---XT-X"],
-			["Alnilam", "X-X-X-XXEX"],
-			["Alnitak", "--FRX-CXEX"],
-			["Alphard", "-XX---I-CX"],
-			["Alpheratz", "XSB-S-FIX-"],
-			["Alsephina", "--I---T--X"],
-			["Altair", "P-----XXXM"],
-			["Antares", "R-X-----XX"],
-			["Arcturus", "FFX----XBX"],
-			["Atria", "XXX----XST"],
-			["Avior", "-IRXX---XX"],
-			["Bellatrix", "R-----X--C"],
-			["Betelgeuse", "--X----C-P"],
-			["Canopus", "E-R-X-FXBR"],
-			["Capella", "CMM-X---CF"],
-			["Castor", "-------MXB"],
-			["Deneb", "X-X-----XM"],
-			["Diphda", "XXP--TXCBC"],
-			["Dubhe", "------B-XE"],
-			["Elnath", "MXX----REX"],
-			["Fomalhaut", "X-X-R-FCEP"],
-			["Gacrux", "X-X-----PP"],
-			["Hadar", "--S------C"],
-			["Hamal", "XXEPX-XX-P"],
-			["Menkalinan", "-RM---XEIM"],
-			["Menkent", "XXS-I---XX"],
-			["Miaplacidus", "T-E----XXX"],
-			["Mimosa", "MXP---BBXS"],
-			["Mirfak", "--I----TBX"],
-			["Mirzam", "X-B------C"],
-			["Nunki", "X-F----XXI"],
-			["Peacock", "-EXI-X-PXX"],
-			["Pollux", "-XP------F"],
-			["Procyon", "--F---FXXT"],
-			["Regulus", "-XEX----RC"],
-			["Rigel", "SXEM----MX"],
-			["Rigil Kentaurus", "--X-F-XM-E"],
-			["Sargas", "--------BX"],
-			["Sirius", "TXX----XXX"],
-			["Spica", "T-X----XIX"],
-			["Toliman", "--X-----XX"],
-			["Vega", "--R---XPXR"],
-			["Wezen", "R-T----X-X"],
+			["Achernar", "---PX-X---"],
+			["Acrux", "XX---XXB--"],
+			["Adhara", "CXX-X-BP-S"],
+			["Aldebaran", "FSS----MEP"],
+			["Alhena", "XXX-BXX-TX"],
+			["Alioth", "BXX--R----"],
+			["Alkaid", "------XX-M"],
+			["Alnair", "--C----S-X"],
+			["Alnilam", "-X------XE"],
+			["Alnitak", "XXXPXMCIXX"],
+			["Alphard", "XXX-X---R-"],
+			["Alpheratz", "-XX--IX--F"],
+			["Alsephina", "RSX-X--X--"],
+			["Altair", "X-----B---"],
+			["Antares", "-TB-XXB-XX"],
+			["Arcturus", "-X---P---X"],
+			["Atria", "X-XXXIXXFE"],
+			["Avior", "XB-X-XXE-X"],
+			["Bellatrix", "-X--X----T"],
+			["Betelgeuse", "RX---XX--T"],
+			["Canopus", "X-XC-PFXTX"],
+			["Capella", "--XSX--I--"],
+			["Castor", "EXFXB-XIPC"],
+			["Deneb", "T-XI-MF--P"],
+			["Diphda", "-I-MX-PE-R"],
+			["Dubhe", "XX-EXBXX-X"],
+			["Elnath", "FX--XX-XXM"],
+			["Fomalhaut", "X-S-XXM---"],
+			["Gacrux", "FRCX-IXRXX"],
+			["Hadar", "M--TC-E--X"],
+			["Hamal", "IF-X-R-X--"],
+			["Menkalinan", "--X---I-XC"],
+			["Menkent", "FXR--XXT--"],
+			["Miaplacidus", "XX----TTBX"],
+			["Mimosa", "XCSXR-EC-X"],
+			["Mirfak", "-XT-MB-X--"],
+			["Mirzam", "PXE--FM-XS"],
+			["Nunki", "----CXPX--"],
+			["Peacock", "-----RPXR-"],
+			["Pollux", "XT-----XX-"],
+			["Procyon", "---XF----X"],
+			["Regulus", "X-X--XXX-M"],
+			["Rigel", "--RI-X-F--"],
+			["Rigil Kentaurus", "-XX--M-I-X"],
+			["Sargas", "X--ECX-PX-"],
+			["Sirius", "XE-XB---XM"],
+			["Spica", "IX-X---S--"],
+			["Toliman", "--C-X---S-"],
+			["Vega", "S---SXXX-X"],
+			["Wezen", "-X-TXE----"],
 		];
 
 		const properties = [
-			// "Humans", "Humans", "Humans", "Humans", "Humans",
-			// "Humans", "Humans", "Humans", "Humans", "Humans",
 			"Humans", "Maloqs", "Pelengs", "Faeyans", "Gaals",
 			"Democracy", "Aristocracy", "Monarchy", "Dictatorship", "Anarchy",
 		];
@@ -139,12 +137,13 @@
 		}
 
 		table.stars img {
-			width: 24px;
+			width: 100%;
 		}
 
 		table.stars td:not(:first-child) {
 			text-align: center;
-			width: 20px;
+			width: 48px;
+			padding: 0px;
 		}
 
 		table.stars td:first-child {
@@ -153,6 +152,16 @@
 
 		table.stars tr:first-child td {
 			border-bottom-width: 4px;
+		}
+
+		table.stars tr:first-child td:not(:first-child),
+		table.stars tr:last-child td:not(:first-child) {
+			border-left: none;
+		}
+
+		table.stars tr:first-child td:not(:last-child),
+		table.stars tr:last-child td:not(:last-child) {
+			border-right: none;
 		}
 
 		table.stars tr:last-child td {
@@ -174,14 +183,8 @@
 			text-align: center;
 		}
 
-		.page-with-tables {
-			margin-left: 0;
-			text-align: center;
-			width: 100%;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: space-evenly;
+		.page-with-tables img {
+			width: 50px;
 		}
 	</style>
 </head>
@@ -235,7 +238,7 @@
 				<span class="page-header-section-title">Space Traders</span>
 			</div>
 			<div class="page-content page-with-tables">
-				<div class="center">
+				<div class="center" style="margin-bottom: 32px;">
 					<div>
 						<h3>Races:</h3>
 						<table>
@@ -250,7 +253,7 @@
 					</div>
 				</div>
 
-				<table>
+				<table style="margin: auto;">
 					<tr>
 						<td>Letter</td>
 						<td>Must pay tax if ...</td>

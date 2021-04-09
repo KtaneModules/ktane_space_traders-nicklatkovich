@@ -529,6 +529,10 @@ MonoBehaviour:
   HypercorridorPrefab: {fileID: 1204594566807452, guid: 749b04fb88937a44eabe926122f6d4cb,
     type: 2}
   StarsContainer: {fileID: 1528660130495790}
+  HypercorridorMaterial: {fileID: 2100000, guid: d6ece11d2eae07042939e7ec60585c74,
+    type: 2}
+  UsedHypercorridorMaterial: {fileID: 2100000, guid: 8a4854921a26ae643beeb8e51e336b87,
+    type: 2}
   ShipPowerTextMesh: {fileID: 102869005383903402}
   GoodsTextMesh: {fileID: 102738093715529892}
   BombInfo: {fileID: 114790915360717002}

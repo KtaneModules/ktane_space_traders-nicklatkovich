@@ -5,59 +5,57 @@ using KModkit;
 
 public static class StarData {
 	private static readonly Dictionary<string, string> _data = new Dictionary<string, string> {
-		{ "Achernar", "---------X" },
-		{ "Acrux", "-------X-X" },
-		{ "Adhara", "--------M-" },
-		{ "Aldebaran", "----X--XC-" },
-		{ "Alhena", "-------X--" },
-		{ "Alioth", "-------XX-" },
-		{ "Alkaid", "X-T----X--" },
-		{ "Alnair", "--C-------" },
-		{ "Alnilam", "X-X-------" },
-		{ "Alnitak", "--X------X" },
-		{ "Alphard", "X-X----XFX" },
-		{ "Alpheratz", "--X---X-X-" },
-		{ "Alsephina", "----I-----" },
-		{ "Altair", "X-S--X--C-" },
-		{ "Antares", "--------X-" },
-		{ "Arcturus", "----------" },
-		{ "Atria", "-XT-----RX" },
-		{ "Avior", "X-----XX-X" },
-		{ "Bellatrix", "M-X-------" },
-		{ "Betelgeuse", "--F-----XX" },
-		{ "Canopus", "X--X-----X" },
-		{ "Capella", "-XX-X-FX-X" },
-		{ "Castor", "------X-XI" },
-		{ "Deneb", "X-X---XX--" },
-		{ "Diphda", "--X-X--XX-" },
-		{ "Dubhe", "---X---X-X" },
-		{ "Elnath", "X-------E-" },
-		{ "Fomalhaut", "-X------XX" },
-		{ "Gacrux", "--X---X---" },
-		{ "Hadar", "-XX---X-XI" },
-		{ "Hamal", "X-XI--M---" },
-		{ "Menkalinan", "------I-XX" },
-		{ "Menkent", "--X------X" },
-		{ "Miaplacidus", "-------XXX" },
-		{ "Mimosa", "-X--X----X" },
-		{ "Mirfak", "XX-------X" },
-		{ "Mirzam", "--IF---X-B" },
-		{ "Nunki", "--X-------" },
-		{ "Peacock", "X---------" },
-		{ "Pollux", "--X-------" },
-		{ "Procyon", "---------X" },
-		{ "Regulus", "--X-----XF" },
-		{ "Rigel", "-X--------" },
-		{ "Rigil Kentaurus", "X-----XX-X" },
-		{ "Sargas", "----------" },
-		{ "Sirius", "------XX--" },
-		{ "Spica", "----X-----" },
-		{ "Toliman", "--------X-" },
-		{ "Vega", "XX-------X" },
-		{ "Wezen", "--T------I" },
+		{ "Achernar", "---PX-X---" },
+		{ "Acrux", "XX---XXB--" },
+		{ "Adhara", "CXX-X-BP-S" },
+		{ "Aldebaran", "FSS----MEP" },
+		{ "Alhena", "XXX-BXX-TX" },
+		{ "Alioth", "BXX--R----" },
+		{ "Alkaid", "------XX-M" },
+		{ "Alnair", "--C----S-X" },
+		{ "Alnilam", "-X------XE" },
+		{ "Alnitak", "XXXPXMCIXX" },
+		{ "Alphard", "XXX-X---R-" },
+		{ "Alpheratz", "-XX--IX--F" },
+		{ "Alsephina", "RSX-X--X--" },
+		{ "Altair", "X-----B---" },
+		{ "Antares", "-TB-XXB-XX" },
+		{ "Arcturus", "-X---P---X" },
+		{ "Atria", "X-XXXIXXFE" },
+		{ "Avior", "XB-X-XXE-X" },
+		{ "Bellatrix", "-X--X----T" },
+		{ "Betelgeuse", "RX---XX--T" },
+		{ "Canopus", "X-XC-PFXTX" },
+		{ "Capella", "--XSX--I--" },
+		{ "Castor", "EXFXB-XIPC" },
+		{ "Deneb", "T-XI-MF--P" },
+		{ "Diphda", "-I-MX-PE-R" },
+		{ "Dubhe", "XX-EXBXX-X" },
+		{ "Elnath", "FX--XX-XXM" },
+		{ "Fomalhaut", "X-S-XXM---" },
+		{ "Gacrux", "FRCX-IXRXX" },
+		{ "Hadar", "M--TC-E--X" },
+		{ "Hamal", "IF-X-R-X--" },
+		{ "Menkalinan", "--X---I-XC" },
+		{ "Menkent", "FXR--XXT--" },
+		{ "Miaplacidus", "XX----TTBX" },
+		{ "Mimosa", "XCSXR-EC-X" },
+		{ "Mirfak", "-XT-MB-X--" },
+		{ "Mirzam", "PXE--FM-XS" },
+		{ "Nunki", "----CXPX--" },
+		{ "Peacock", "-----RPXR-" },
+		{ "Pollux", "XT-----XX-" },
+		{ "Procyon", "---XF----X" },
+		{ "Regulus", "X-X--XXX-M" },
+		{ "Rigel", "--RI-X-F--" },
+		{ "Rigil Kentaurus", "-XX--M-I-X" },
+		{ "Sargas", "X--ECX-PX-" },
+		{ "Sirius", "XE-XB---XM" },
+		{ "Spica", "IX-X---S--" },
+		{ "Toliman", "--C-X---S-" },
+		{ "Vega", "S---SXXX-X" },
+		{ "Wezen", "-X-TXE----" },
 	};
-
-	public static readonly HashSet<char> potentialTax = new HashSet<char>(new char[] { 'R', 'C', 'E', 'F' });
 
 	public static string[] starNames {
 		get { return _data.Keys.ToArray(); }
@@ -77,8 +75,12 @@ public static class StarData {
 		for (int i = 0; i < regimeNames.Length; i++) regimeId[regimeNames[i]] = i + raceNames.Length;
 	}
 
+	public static char GetStarType(MapGenerator.CellStar star) {
+		return _data[star.name][raceId[star.race]];
+	}
+
 	public static bool HasTaxAt(MapGenerator.CellStar star, SpaceTradersModule module) {
-		char raceValue = _data[star.name][raceId[star.race]];
+		char raceValue = GetStarType(star);
 		if (raceValue == 'X') return true;
 		char regimeValue = _data[star.name][regimeId[star.regime]];
 		if (regimeValue == 'X') return true;
@@ -103,11 +105,11 @@ public static class StarData {
 		}
 	}
 
-	public static bool CanHasTax(MapGenerator.CellStar star, SpaceTradersModule module) {
-		if (HasTaxAt(star, module)) return true;
-		return new char[] {
-			_data[star.name][raceId[star.race]],
-			_data[star.name][regimeId[star.regime]],
-		}.Any((c) => potentialTax.Contains(c));
+	public static bool HasTaxOnGeneration(MapGenerator.CellStar star, SpaceTradersModule module) {
+		char starType = GetStarType(star);
+		if (starType == 'R') return false;
+		if (starType == 'F') return module.BombInfo.IsTwoFactorPresent();
+		if (starType == 'C' || starType == 'E') return true;
+		return HasTaxAt(star, module);
 	}
 }

@@ -39,18 +39,16 @@ const sortedProperties = [
 const dependencies = "BPISTMRCEF";
 
 const grid = new Array(starNames.length).fill(null).map(() => new Array(properties.length).fill("-"));
-const partSize = (starNames.length + 1) / properties.length;
-
 const dynamics = new Set();
 
 for (let i = 0; i < properties.length; i++) {
   const shuffledStars = shuffled(starNames);
-  const taxedStarsCount = Math.floor(partSize * (Math.random() + i));
+  const taxedStarsCount = starNames.length / 2 + (2 * Math.random() - 1) * starNames.length / 8;
   for (let j = 0; j < taxedStarsCount; j++) {
     const value = "X";
-	const x = starIndex.get(shuffledStars[j]);
-	const y = propertyIndex.get(sortedProperties[i]);
-	if (Math.random() < .5) dynamics.add({ x, y });
+    const x = starIndex.get(shuffledStars[j]);
+    const y = propertyIndex.get(sortedProperties[i]);
+    if (Math.random() < .5) dynamics.add({ x, y });
     grid[x][y] = value;
   }
 }
@@ -59,8 +57,8 @@ const shuffledDependencies = shuffled(dependencies.split("").join(""));
 
 let depIndex = 0;
 for (const { x, y } of shuffled(dynamics)) {
-	grid[x][y] = shuffledDependencies[depIndex];
-	depIndex = (depIndex + 1) % shuffledDependencies.length;
+  grid[x][y] = shuffledDependencies[depIndex];
+  depIndex = (depIndex + 1) % shuffledDependencies.length;
 }
 
 for (let i = 0; i < starNames.length; i++) {

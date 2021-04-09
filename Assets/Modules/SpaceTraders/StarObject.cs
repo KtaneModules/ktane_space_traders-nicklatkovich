@@ -21,6 +21,7 @@ public class StarObject : MonoBehaviour {
 	};
 
 	public GameObject InfoPanel;
+	public GameObject HypercorridorToSun;
 	public Renderer SphereRenderer;
 	public TextMesh StarNameMesh;
 	public TextMesh RaceNameMesh;
