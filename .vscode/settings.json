@@ -7,6 +7,10 @@
 		"editor.insertSpaces": false,
 		"editor.tabSize": 4,
 	},
+	"[html]": {
+		"editor.wrappingIndent": "indent"
+	},
+	"html.format.wrapLineLength": 0,
 	"files.exclude": {
 		"steam_api64.dll": true,
 		"steam_appid.txt": true,

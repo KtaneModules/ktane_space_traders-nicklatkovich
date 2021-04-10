@@ -61,7 +61,7 @@ public static class MapGenerator {
 		public CellStar star = null;
 	}
 
-	public static HashSet<CellStar> Generate(SpaceTradersModule module, out int maxTax, out int goodsToBeSoldCount) {
+	public static HashSet<CellStar> Generate(SpaceTradersModule module) {
 		HashSet<string> unusedStarNames = new HashSet<string>(StarData.starNames);
 		HashSet<CellStar> result = new HashSet<CellStar>();
 		Cell[][] grid = new Cell[GRID_WIDHT][];
@@ -107,7 +107,6 @@ public static class MapGenerator {
 		sun.regime = "Democracy";
 		MarkEdges(result);
 		GenerateTaxes(result);
-		GenerateMaxTaxAndGoodsToSoldCount(result, module, out maxTax, out goodsToBeSoldCount);
 		return result;
 	}
 
@@ -116,8 +115,9 @@ public static class MapGenerator {
 	) {
 		CellStar[] stars = starsSet.Where((cell) => cell.edge).ToArray();
 		int[] maxPathsTaxes = stars.Select((s) => (
-			s.path.Where((p) => StarData.HasTaxOnGeneration(p, module)).Select((p) => p.tax).Sum())
+			s.path.Where((p) => StarData.HasTaxOnGenerationAt(p, module)).Select((p) => p.tax).Sum())
 		).ToArray();
+		Debug.Log(maxPathsTaxes);
 		System.Array.Sort(maxPathsTaxes);
 		int i = maxPathsTaxes.Length / 2;
 		int _maxTax = maxPathsTaxes[i];

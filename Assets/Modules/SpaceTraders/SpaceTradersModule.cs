@@ -13,6 +13,7 @@ public class SpaceTradersModule : MonoBehaviour {
 
 	public GameObject HypercorridorPrefab;
 	public GameObject StarsContainer;
+	public KMAudio Audio;
 	public Material HypercorridorMaterial;
 	public Material UsedHypercorridorMaterial;
 	public TextMesh ShipPowerTextMesh;
@@ -22,6 +23,9 @@ public class SpaceTradersModule : MonoBehaviour {
 	public StarObject StarPrefab;
 
 	public Dictionary<string, StarObject> starByName = new Dictionary<string, StarObject>();
+
+	private bool _activated = false;
+	public bool activated { get { return _activated; } }
 
 	private HashSet<string> _submittedStars = new HashSet<string>();
 	public HashSet<string> submittedStars { get { return new HashSet<string>(_submittedStars); } }
@@ -53,7 +57,7 @@ public class SpaceTradersModule : MonoBehaviour {
 		private set {
 			_soldGoodsCount = value;
 			GoodsTextMesh.text = string.Format(@"{0}/{1}", soldGoodsCount, goodsToBeSoldCount);
-			if (soldGoodsCount >= goodsToBeSoldCount) BombModule.HandlePass();
+			if (soldGoodsCount > 0 && soldGoodsCount >= goodsToBeSoldCount) BombModule.HandlePass();
 		}
 	}
 
@@ -65,7 +69,13 @@ public class SpaceTradersModule : MonoBehaviour {
 	private List<GameObject> _hypercorridors = new List<GameObject>();
 
 	private void Start() {
+		StarsContainer.transform.localScale = Vector3.zero;
 		_moduleId = _moduleIdCounter++;
+		BombModule.OnActivate += () => Activate();
+	}
+
+	private void Activate() {
+		_startingMinutes = remainingMinutesCount;
 		GenerateStars();
 		KMSelectable selfSelectable = GetComponent<KMSelectable>();
 		selfSelectable.Children = starByName.Values.Select((star) => {
@@ -74,20 +84,17 @@ public class SpaceTradersModule : MonoBehaviour {
 			return starSelectable;
 		}).ToArray();
 		selfSelectable.UpdateChildren();
-		BombModule.OnActivate += () => Activate();
+		_activated = true;
 	}
 
-	private void Activate() {
-		_startingMinutes = remainingMinutesCount;
+	private void Update() {
+		if (_activated) {
+			StarsContainer.transform.localScale += (Vector3.one - StarsContainer.transform.localScale) * .01f;
+		}
 	}
+
 	private void GenerateStars() {
-		int maxTax;
-		int goodsToBeSoldCount;
-		HashSet<MapGenerator.CellStar> cells = MapGenerator.Generate(this, out maxTax, out goodsToBeSoldCount);
-		Debug.LogFormat("[Space Traders #{0}] Max tax per vessel: {1}", _moduleId, maxTax);
-		Debug.LogFormat("[Space Traders #{0}] Products to be sold: {1}", _moduleId, goodsToBeSoldCount);
-		this.maxTax = maxTax;
-		this.goodsToBeSoldCount = goodsToBeSoldCount;
+		HashSet<MapGenerator.CellStar> cells = MapGenerator.Generate(this);
 		foreach (MapGenerator.CellStar cell in cells) {
 			Debug.LogFormat("[Space Traders #{0}] Star generated: {1}-{2}-{3}-{4}:{5} -> {6}", _moduleId, cell.name,
 				cell.race, cell.regime, cell.position.x, cell.position.y,
@@ -101,9 +108,11 @@ public class SpaceTradersModule : MonoBehaviour {
 			float z = CELL_SIZE * (cell.position.y - (GRID_HEIGHT - 1) / 2f);
 			z += Random.Range(-CELL_SIZE / 2f, CELL_SIZE / 2f);
 			star.transform.localPosition = new Vector3(x, y, z);
+			star.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
 			starByName[cell.name] = star;
 		}
 		GenerateHypercorridors();
+		ResetModule();
 		AddHandlers();
 	}
 
@@ -124,9 +133,7 @@ public class SpaceTradersModule : MonoBehaviour {
 				Vector3 to = star.transform.localPosition;
 				hypercorridor.transform.localPosition = (to + from) / 2f;
 				hypercorridor.transform.localRotation = Quaternion.LookRotation(from - to, Vector3.up);
-				Vector3 hyperScale = hypercorridor.transform.localScale;
-				hyperScale.z = (to - from).magnitude;
-				hypercorridor.transform.localScale = hyperScale;
+				hypercorridor.transform.localScale = new Vector3(0.001f, 0.001f, (to - from).magnitude);
 			}
 		}
 	}
@@ -142,8 +149,12 @@ public class SpaceTradersModule : MonoBehaviour {
 					|| cell.name == MapGenerator.SUN_NAME
 					|| _submittedStars.Contains(cell.name)
 					|| soldGoodsCount == goodsToBeSoldCount
-				) return false;
-				Debug.LogFormat("[Space Traders #{0}] Pressed star {1}", _moduleId, cell.name);
+				) {
+					Audio.PlaySoundAtTransform("NotOutskirts", selectable.transform);
+					return false;
+				}
+				Debug.LogFormat("[Space Traders #{0}] Pressed star: {1}", _moduleId, cell.name);
+				Debug.LogFormat("[Space Traders #{0}] Current time: {1}", _moduleId, BombInfo.GetFormattedTime());
 				Debug.LogFormat("[Space Traders #{0}] Path: {1}", _moduleId, cell.path.Select((c) => c.name).Join(","));
 				IEnumerable<MapGenerator.CellStar> starsWithTax = cell.path.Where((s) => StarData.HasTaxAt(s, self));
 				Debug.LogFormat("[Space Traders #{0}] Stars with tax: {1}", _moduleId,
@@ -154,8 +165,9 @@ public class SpaceTradersModule : MonoBehaviour {
 					Debug.LogFormat("[Space Traders #{0}] Required tax greater than maximum allowed", _moduleId);
 					BombModule.HandleStrike();
 					Debug.LogFormat("[Space Traders #{0}] Reseting module", _moduleId);
-					ResetModule();
+					ResetModule(true);
 				} else {
+					Audio.PlaySoundAtTransform("StarSubmitted", selectable.transform);
 					soldGoodsCount += 1;
 					Debug.LogFormat("[Space Traders #{0}] Sold products count: {1}/{2}", _moduleId, soldGoodsCount,
 						goodsToBeSoldCount);
@@ -169,7 +181,7 @@ public class SpaceTradersModule : MonoBehaviour {
 		}
 	}
 
-	public void ResetModule() {
+	public void ResetModule(bool generateNewRegimes = false) {
 		foreach (GameObject hypercorridor in _hypercorridors) {
 			hypercorridor.GetComponent<Renderer>().material = HypercorridorMaterial;
 		}
@@ -179,15 +191,26 @@ public class SpaceTradersModule : MonoBehaviour {
 		int _goodsToBeSoldCount;
 		List<StarObject> stars = starByName.Values.ToList();
 		HashSet<MapGenerator.CellStar> cells = new HashSet<MapGenerator.CellStar>(stars.Select((s) => s.cell));
-		foreach (MapGenerator.CellStar cell in cells) {
-			string newRegime = StarData.regimeNames.PickRandom();
-			if (cell.regime == newRegime) continue;
-			Debug.LogFormat("[Space Traders #{0}] Star {1}: regime changed to {2}", _moduleId, cell.name, newRegime);
-			cell.regime = newRegime;
+		if (generateNewRegimes) {
+			foreach (MapGenerator.CellStar cell in cells) {
+				string newRegime = StarData.regimeNames.PickRandom();
+				if (cell.regime == newRegime) continue;
+				Debug.LogFormat("[Space Traders #{0}] Star {1}: regime changed to {2}", _moduleId, cell.name,
+					newRegime);
+				cell.regime = newRegime;
+			}
 		}
 		MapGenerator.GenerateMaxTaxAndGoodsToSoldCount(cells, this, out _maxTax, out _goodsToBeSoldCount);
 		Debug.LogFormat("[Space Traders #{0}] New max tax per vessel: {1}", _moduleId, _maxTax);
 		Debug.LogFormat("[Space Traders #{0}] New products count to be sold: {1}", _moduleId, _goodsToBeSoldCount);
+		Debug.LogFormat("[Space Traders #{0}] Possible solutions for even minute: {1}", _moduleId, stars.Where((s) => (
+			s.cell.edge
+		)).Select((s) => (
+			new {
+				tax = s.cell.path.Where((p) => StarData.HasTaxOnGenerationAt(p, this)).Select((p) => p.tax).Sum(),
+				name = s.cell.name
+			}
+		)).Where((d) => d.tax <= _maxTax).Select((d) => d.name).Join(","));
 		maxTax = _maxTax;
 		goodsToBeSoldCount = _goodsToBeSoldCount;
 		foreach (StarObject star in stars) star.cell = star.cell;

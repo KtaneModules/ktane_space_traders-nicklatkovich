@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
-using UnityEditor;
 
 public class StarObject : MonoBehaviour {
 	public const float INFO_PANEL_OFFSET = 7f;
@@ -22,6 +19,7 @@ public class StarObject : MonoBehaviour {
 
 	public GameObject InfoPanel;
 	public GameObject HypercorridorToSun;
+	public Light Halo;
 	public Renderer SphereRenderer;
 	public TextMesh StarNameMesh;
 	public TextMesh RaceNameMesh;
@@ -57,12 +55,8 @@ public class StarObject : MonoBehaviour {
 	}
 
 	private void Start() {
-		Color starColor = GetRandomStarColor();
-		SphereRenderer.material.SetColor("_Color", starColor);
-		Color haloColor = GetRandomStarColor();
-		SerializedObject halo = new SerializedObject(SphereRenderer.GetComponent("Halo"));
-		halo.FindProperty("m_Color").colorValue = haloColor;
-		halo.ApplyModifiedProperties();
+		SphereRenderer.material.SetColor("_Color", GetRandomStarColor());
+		Halo.color = GetRandomStarColor();
 		KMSelectable selfSelectable = GetComponent<KMSelectable>();
 		InfoPanel.transform.localScale = Vector3.zero;
 		selfSelectable.OnHighlight += () => {

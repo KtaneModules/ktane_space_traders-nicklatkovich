@@ -75,22 +75,23 @@ public static class StarData {
 		for (int i = 0; i < regimeNames.Length; i++) regimeId[regimeNames[i]] = i + raceNames.Length;
 	}
 
-	public static char GetStarType(MapGenerator.CellStar star) {
+	public static char GetRaceType(MapGenerator.CellStar star) {
 		return _data[star.name][raceId[star.race]];
 	}
 
-	public static bool HasTaxAt(MapGenerator.CellStar star, SpaceTradersModule module) {
-		char raceValue = GetStarType(star);
-		if (raceValue == 'X') return true;
-		char regimeValue = _data[star.name][regimeId[star.regime]];
-		if (regimeValue == 'X') return true;
-		if (raceValue != '-' && HasTax(raceValue, module)) return true;
-		return regimeValue != '-' && HasTax(regimeValue, module);
+	public static char GetRegimeType(MapGenerator.CellStar star) {
+		return _data[star.name][regimeId[star.regime]];
 	}
 
-	public static bool HasTax(char value, SpaceTradersModule module) {
+	public static bool HasTaxAt(MapGenerator.CellStar star, SpaceTradersModule module) {
+		return HasTax(GetRaceType(star), module) || HasTax(GetRegimeType(star), module);
+	}
+
+	public static bool HasTax(char type, SpaceTradersModule module) {
 		KMBombInfo bombInfo = module.BombInfo;
-		switch (value) {
+		switch (type) {
+			case '-': return false;
+			case 'X': return true;
 			case 'B': return bombInfo.GetBatteryCount() < 4;
 			case 'P': return !bombInfo.IsPortPresent(Port.Serial) && !bombInfo.IsPortPresent(Port.Parallel);
 			case 'I': return bombInfo.GetIndicators().Count() % 2 == 0;
@@ -101,15 +102,19 @@ public static class StarData {
 			case 'C': return bombInfo.GetSolvedModuleIDs().Count() % 2 == 0;
 			case 'E': return bombInfo.GetStrikes() == 0;
 			case 'F': return bombInfo.GetTwoFactorCodes().Any((code) => code % 2 == 0);
-			default: throw new UnityException(string.Format("Unknown system code {0}", (int)value));
+			default: throw new UnityException(string.Format("Unknown system code {0}", (int)type));
 		}
 	}
 
-	public static bool HasTaxOnGeneration(MapGenerator.CellStar star, SpaceTradersModule module) {
-		char starType = GetStarType(star);
-		if (starType == 'R') return false;
-		if (starType == 'F') return module.BombInfo.IsTwoFactorPresent();
-		if (starType == 'C' || starType == 'E') return true;
+	public static bool HasTaxOnGenerationAt(MapGenerator.CellStar star, SpaceTradersModule module) {
+		return HasTaxOnGeneration(star, GetRaceType(star), module)
+			|| HasTaxOnGeneration(star, GetRegimeType(star), module);
+	}
+
+	public static bool HasTaxOnGeneration(MapGenerator.CellStar star, char type, SpaceTradersModule module) {
+		if (type == 'R') return false;
+		if (type == 'F') return module.BombInfo.IsTwoFactorPresent();
+		if (type == 'C' || type == 'E') return true;
 		return HasTaxAt(star, module);
 	}
 }
