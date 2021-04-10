@@ -83,7 +83,6 @@
 				img.src = `img/Space Traders/${propName}.svg`;
 			}
 		}
-
 		document.addEventListener("DOMContentLoaded", () => {
 			document.getElementById("first-page-number").innerText = `Page 1 of ${tablesCount + STATIC_PAGES_COUNT}`;
 			document.getElementById("second-page-number").innerText = `Page 2 of ${tablesCount + STATIC_PAGES_COUNT}`;
@@ -91,6 +90,14 @@
 			for (let tableIndex = 0; tableIndex < tablesCount; tableIndex++) {
 				const page = manual.appendChild(document.createElement("div"));
 				page.className = `page page-bg-0${(tableIndex + 3) % 7 + 1}`;
+				const header = page.appendChild(document.createElement("div"));
+				header.className = "page-header";
+				const headerDocTitle = header.appendChild(document.createElement("span"));
+				headerDocTitle.className = "page-header-doc-title";
+				headerDocTitle.innerText = "Keep Talking and Nobody Explodes Mod";
+				const headerSectionTitle = header.appendChild(document.createElement("span"));
+				headerSectionTitle.className = "page-header-section-title";
+				headerSectionTitle.innerText = "Space Traders";
 				const content = page.appendChild(document.createElement("div"));
 				content.className = "page-content";
 				const table = content.appendChild(document.createElement("table"));
@@ -204,7 +211,7 @@
 				<p class="flavour-text">You are no longer a bomb diffuser. You are now a SPACE TRADER!</p>
 				<p>The module is a star map with hypercorridors marked on it. At the bottom left, the maximum tax amount per vessel is displayed, as well as the number of products sold and the number of products to be sold.</p>
 				<p>When you hover a star, you will receive information about its name, the race that lives there, the political regime and the tax amount. Using star's name, race and regime, determine if you should pay tax or not using the tables on the next pages.
-				<p>The best selling prices are in the outskirts, so you only need to sell there. Outskirts are the star systems that has only one hypercorridor. To send a vessel to the star system press it. But be careful: if on the way from the solar system to the destination (including the end point) the sum tax amount is greater than the maximum tax amount per vessel, then strike will be occured, the number of sold products will be reseted. Also new number of products to sold, new maximum tax amount and star systems' political regimes will be generate. As soon as the required number of products is sold, the module will be solved. Correctly submitted paths will be marked in green.</p>
+				<p>The best selling prices are in the outskirts, so you only need to sell there. Outskirts are the star systems that has only one hypercorridor. To send a vessel to the star system press it. But be careful: if on the way from the solar system to the destination (including the end point) the sum tax amount is greater than the maximum tax amount per vessel, then you will get a strike, the number of sold products will be reseted. Also new number of products to sold, new maximum tax amount and star systems' political regimes will be generated. As soon as the required number of products is sold, the module will be solved. Correctly submitted paths will be marked in green.</p>
 			</div>
 			<div class="page-footer relative-footer" id="first-page-number">Page 1 of 2</div>
 		</div>
@@ -230,7 +237,6 @@
 						</table>
 					</div>
 				</div>
-
 				<table style="margin: auto;">
 					<tr>
 						<td>Letter</td>

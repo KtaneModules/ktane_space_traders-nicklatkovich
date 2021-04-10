@@ -6,8 +6,8 @@ public class SpaceTradersModule : MonoBehaviour {
 	public const int GRID_WIDHT = 10;
 	public const int GRID_HEIGHT = 10;
 	public const float CELL_SIZE = .015f;
-	public const float STAR_MIN_HEIGHT = .03f;
-	public const float STAR_MAX_HEIGHT = .07f;
+	public const float STAR_MIN_HEIGHT = .015f;
+	public const float STAR_MAX_HEIGHT = .055f;
 
 	private static int _moduleIdCounter = 1;
 
@@ -23,9 +23,6 @@ public class SpaceTradersModule : MonoBehaviour {
 	public StarObject StarPrefab;
 
 	public Dictionary<string, StarObject> starByName = new Dictionary<string, StarObject>();
-
-	private bool _activated = false;
-	public bool activated { get { return _activated; } }
 
 	private HashSet<string> _submittedStars = new HashSet<string>();
 	public HashSet<string> submittedStars { get { return new HashSet<string>(_submittedStars); } }
@@ -69,14 +66,15 @@ public class SpaceTradersModule : MonoBehaviour {
 	private List<GameObject> _hypercorridors = new List<GameObject>();
 
 	private void Start() {
-		StarsContainer.transform.localScale = Vector3.zero;
 		_moduleId = _moduleIdCounter++;
+		GenerateStars();
+		ResetModule();
+		AddHandlers();
 		BombModule.OnActivate += () => Activate();
 	}
 
 	private void Activate() {
 		_startingMinutes = remainingMinutesCount;
-		GenerateStars();
 		KMSelectable selfSelectable = GetComponent<KMSelectable>();
 		selfSelectable.Children = starByName.Values.Select((star) => {
 			KMSelectable starSelectable = star.GetComponent<KMSelectable>();
@@ -84,13 +82,6 @@ public class SpaceTradersModule : MonoBehaviour {
 			return starSelectable;
 		}).ToArray();
 		selfSelectable.UpdateChildren();
-		_activated = true;
-	}
-
-	private void Update() {
-		if (_activated) {
-			StarsContainer.transform.localScale += (Vector3.one - StarsContainer.transform.localScale) * .01f;
-		}
 	}
 
 	private void GenerateStars() {
@@ -112,8 +103,6 @@ public class SpaceTradersModule : MonoBehaviour {
 			starByName[cell.name] = star;
 		}
 		GenerateHypercorridors();
-		ResetModule();
-		AddHandlers();
 	}
 
 	private void GenerateHypercorridors() {
