@@ -100,6 +100,7 @@ public class SpaceTradersModule : MonoBehaviour {
 			z += Random.Range(-CELL_SIZE / 2f, CELL_SIZE / 2f);
 			star.transform.localPosition = new Vector3(x, y, z);
 			star.transform.localScale = new Vector3(0.005f, 0.005f, 0.005f);
+			star.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
 			starByName[cell.name] = star;
 		}
 		GenerateHypercorridors();
