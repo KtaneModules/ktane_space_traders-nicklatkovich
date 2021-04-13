@@ -43,6 +43,12 @@ public class SpaceTradersModule : MonoBehaviour {
 	private int _startingMinutes;
 	public int startingMinutes { get { return _startingMinutes; } }
 
+	private bool _solved = false;
+	public bool solved { get { return _solved; } }
+
+	private bool _forceSolved = false;
+	public bool forceSolved { get { return _forceSolved; } }
+
 	private int _maxTax;
 	public int maxTax {
 		get { return _maxTax; }
@@ -67,10 +73,7 @@ public class SpaceTradersModule : MonoBehaviour {
 		private set {
 			_soldGoodsCount = value;
 			GoodsTextMesh.text = string.Format(@"{0}/{1}", soldGoodsCount, goodsToBeSoldCount);
-			if (soldGoodsCount > 0 && soldGoodsCount >= goodsToBeSoldCount) {
-				foreach (StarObject star in starByName.Values) star.disabled = true;
-				BombModule.HandlePass();
-			}
+			if (soldGoodsCount > 0 && soldGoodsCount >= goodsToBeSoldCount) OnSolved();
 		}
 	}
 
@@ -195,6 +198,21 @@ public class SpaceTradersModule : MonoBehaviour {
 		yield return null;
 	}
 
+	public void TwitchHandleForcedSolve() {
+		if (solved) return;
+		Debug.LogFormat("[Space Traders #{0}] Module force-solved", _moduleId);
+		_forceSolved = true;
+		foreach (StarObject star in starByName.Values.Where((s) => s.cell.adjacentStars.Count == 1)) {
+			int requiredTax = star.cell.path.Where((c) => StarData.HasTaxAt(c, this)).Select((c) => c.tax).Sum();
+			if (requiredTax <= maxTax) {
+				foreach (StarObject pathStar in star.cell.path.Select((pathCell) => starByName[pathCell.name])) {
+					pathStar.HypercorridorToSun.GetComponent<Renderer>().material = UsedHypercorridorMaterial;
+				}
+			}
+		}
+		soldGoodsCount = goodsToBeSoldCount;
+	}
+
 	private void GenerateStars() {
 		HashSet<MapGenerator.CellStar> cells = MapGenerator.Generate(this);
 		foreach (MapGenerator.CellStar cell in cells) {
@@ -253,7 +271,7 @@ public class SpaceTradersModule : MonoBehaviour {
 			star.cell.adjacentStars.Count() != 1
 			|| star.cell.name == MapGenerator.SUN_NAME
 			|| _submittedStars.Contains(star.cell.name)
-			|| soldGoodsCount == goodsToBeSoldCount
+			|| solved
 		) {
 			Audio.PlaySoundAtTransform("NotOutskirts", star.transform);
 			return true;
@@ -323,5 +341,11 @@ public class SpaceTradersModule : MonoBehaviour {
 		)).Where((d) => d.tax <= _maxTax).Select((d) => d.name).Join(","));
 		maxTax = _maxTax;
 		goodsToBeSoldCount = _goodsToBeSoldCount;
+	}
+
+	private void OnSolved() {
+		_solved = true;
+		foreach (StarObject star in starByName.Values) star.disabled = true;
+		BombModule.HandlePass();
 	}
 }
