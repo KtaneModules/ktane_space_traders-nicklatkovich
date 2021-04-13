@@ -85,12 +85,13 @@ public class SpaceTradersModule : MonoBehaviour {
 		_moduleId = _moduleIdCounter++;
 		GenerateStars();
 		ResetModule();
-		AddHandlers();
 		BombModule.OnActivate += () => Activate();
+		AddHandlers();
 	}
 
 	private void Activate() {
 		_startingMinutes = remainingMinutesCount;
+		Debug.LogFormat("[Space Traders #{0}] Bomb starting time in minutes is {1}", _moduleId, startingMinutes);
 		KMSelectable selfSelectable = GetComponent<KMSelectable>();
 		selfSelectable.Children = starByName.Values.Select((star) => {
 			KMSelectable starSelectable = star.GetComponent<KMSelectable>();
@@ -98,6 +99,7 @@ public class SpaceTradersModule : MonoBehaviour {
 			return starSelectable;
 		}).ToArray();
 		selfSelectable.UpdateChildren();
+		GenerateMaxTaxAndGoodsToSoldCount();
 	}
 
 	public IEnumerator ProcessTwitchCommand(string command) {
@@ -282,17 +284,15 @@ public class SpaceTradersModule : MonoBehaviour {
 		return true;
 	}
 
-	public void ResetModule(bool generateNewRegimes = false) {
+	private void ResetModule(bool generateNewRegimes = false) {
 		foreach (GameObject hypercorridor in _hypercorridors) {
 			hypercorridor.GetComponent<Renderer>().material = HypercorridorMaterial;
 		}
-		soldGoodsCount = 0;
 		_submittedStars = new HashSet<string>();
-		int _maxTax;
-		int _goodsToBeSoldCount;
 		List<StarObject> stars = starByName.Values.ToList();
 		HashSet<MapGenerator.CellStar> cells = new HashSet<MapGenerator.CellStar>(stars.Select((s) => s.cell));
 		if (generateNewRegimes) {
+			soldGoodsCount = 0;
 			foreach (MapGenerator.CellStar cell in cells) {
 				string newRegime = StarData.regimeNames.PickRandom();
 				if (cell.regime == newRegime) continue;
@@ -300,7 +300,16 @@ public class SpaceTradersModule : MonoBehaviour {
 					newRegime);
 				cell.regime = newRegime;
 			}
+			GenerateMaxTaxAndGoodsToSoldCount();
 		}
+		foreach (StarObject star in stars) star.cell = star.cell;
+	}
+
+	private void GenerateMaxTaxAndGoodsToSoldCount() {
+		List<StarObject> stars = starByName.Values.ToList();
+		HashSet<MapGenerator.CellStar> cells = new HashSet<MapGenerator.CellStar>(stars.Select((s) => s.cell));
+		int _maxTax;
+		int _goodsToBeSoldCount;
 		MapGenerator.GenerateMaxTaxAndGoodsToSoldCount(cells, this, out _maxTax, out _goodsToBeSoldCount);
 		Debug.LogFormat("[Space Traders #{0}] New max tax per vessel: {1}", _moduleId, _maxTax);
 		Debug.LogFormat("[Space Traders #{0}] New products count to be sold: {1}", _moduleId, _goodsToBeSoldCount);
@@ -314,6 +323,5 @@ public class SpaceTradersModule : MonoBehaviour {
 		)).Where((d) => d.tax <= _maxTax).Select((d) => d.name).Join(","));
 		maxTax = _maxTax;
 		goodsToBeSoldCount = _goodsToBeSoldCount;
-		foreach (StarObject star in stars) star.cell = star.cell;
 	}
 }
