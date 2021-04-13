@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -22,6 +23,18 @@ public class SpaceTradersModule : MonoBehaviour {
 	public KMBombModule BombModule;
 	public StarObject StarPrefab;
 
+	public readonly string TwitchHelpMessage = new string[] {
+		"\"outskirts\" to view all outskirts",
+		"\"trace Sirius\" to get information about all star systems on the path from the Sun to any other star",
+		"\"send Vega\" to send a vessel to the outskirt star",
+		"\"look Altair\" to view a specific star",
+		"Star name with whitespace should be wroten in one word",
+		"All commands and star's names are case insensitive",
+		"\"trace\" and \"send\" commands can contain more than one star",
+		"\"trace\", \"outskirts\" and \"look\" commands are cancelable",
+	}.Join(" | ");
+
+	public bool TwitchShouldCancelCommand = false;
 	public Dictionary<string, StarObject> starByName = new Dictionary<string, StarObject>();
 
 	private HashSet<string> _submittedStars = new HashSet<string>();
@@ -54,7 +67,10 @@ public class SpaceTradersModule : MonoBehaviour {
 		private set {
 			_soldGoodsCount = value;
 			GoodsTextMesh.text = string.Format(@"{0}/{1}", soldGoodsCount, goodsToBeSoldCount);
-			if (soldGoodsCount > 0 && soldGoodsCount >= goodsToBeSoldCount) BombModule.HandlePass();
+			if (soldGoodsCount > 0 && soldGoodsCount >= goodsToBeSoldCount) {
+				foreach (StarObject star in starByName.Values) star.disabled = true;
+				BombModule.HandlePass();
+			}
 		}
 	}
 
@@ -82,6 +98,99 @@ public class SpaceTradersModule : MonoBehaviour {
 			return starSelectable;
 		}).ToArray();
 		selfSelectable.UpdateChildren();
+	}
+
+	public IEnumerator ProcessTwitchCommand(string command) {
+		command = command.Trim().ToLower();
+		if (command == "outskirts") {
+			foreach (StarObject star in starByName.Values) {
+				if (star.cell.adjacentStars.Count != 1 || star.cell.name == MapGenerator.SUN_NAME) continue;
+				yield return new WaitForSeconds(.1f);
+				if (TwitchShouldCancelCommand) {
+					yield return "cancelled";
+					yield break;
+				}
+				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(true);
+				star.Highlight();
+				yield return new WaitForSeconds(5f);
+				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(false);
+				star.RemoveHighlight();
+			}
+			yield break;
+		}
+		if (command.StartsWith("trace ")) {
+			string starName = command.Skip(6).Join("").Trim();
+			if (starName == MapGenerator.SUN_NAME) yield break;
+			if (
+				!StarData.HasLowerCasedStarName(starName)
+				|| !starByName.ContainsKey(StarData.LowerCasedStarNameToActual(starName))
+			) {
+				yield return "sendtochat {0}, !{1} " + string.Format("Star \"{0}\" not found", starName);
+				yield break;
+			}
+			StarObject target = starByName[StarData.LowerCasedStarNameToActual(starName)];
+			foreach (MapGenerator.CellStar cell in target.cell.path) {
+				yield return new WaitForSeconds(.1f);
+				if (TwitchShouldCancelCommand) {
+					yield return "cancelled";
+					yield break;
+				}
+				StarObject star = starByName[cell.name];
+				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(true);
+				star.Highlight();
+				yield return new WaitForSeconds(5f);
+				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(false);
+				star.RemoveHighlight();
+			}
+			yield break;
+		}
+		if (command.StartsWith("send ")) {
+			string[] starsName = command.Split(' ').Skip(1).Where((n) => n.Length > 0).ToArray();
+			string[] unknownStars = starsName.Where((s) => (
+				!StarData.HasLowerCasedStarName(s) || !starByName.ContainsKey(StarData.LowerCasedStarNameToActual(s))
+			)).ToArray();
+			if (unknownStars.Length > 0) {
+				yield return "sendtochat {0}, !{1} " + string.Format(
+					"Stars {0} not found",
+					unknownStars.Select((s) => string.Format("\"{0}\"", s)).Join(", ")
+				);
+				yield break;
+			}
+			foreach (StarObject star in starsName.Select((s) => starByName[StarData.LowerCasedStarNameToActual(s)])) {
+				bool success = OnStarPressed(star);
+				if (!success) break;
+			}
+			yield return new KMSelectable[] { };
+			yield break;
+		}
+		if (command.StartsWith("look ")) {
+			string[] starsName = command.Split(' ').Skip(1).Where((n) => n.Length > 0).ToArray();
+			string[] unknownStars = starsName.Where((s) => (
+				!StarData.HasLowerCasedStarName(s) || !starByName.ContainsKey(StarData.LowerCasedStarNameToActual(s))
+			)).ToArray();
+			if (unknownStars.Length > 0) {
+				yield return "sendtochat {0}, !{1} " + string.Format(
+					"Stars {0} not found",
+					unknownStars.Select((s) => string.Format("\"{0}\"", s)).Join(", ")
+				);
+				yield break;
+			}
+			foreach (string starName in starsName) {
+				yield return new WaitForSeconds(.1f);
+				if (TwitchShouldCancelCommand) {
+					yield return "cancelled";
+					yield break;
+				}
+				StarObject star = starByName[StarData.LowerCasedStarNameToActual(starName)];
+				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(true);
+				star.Highlight();
+				yield return new WaitForSeconds(5f);
+				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(false);
+				star.RemoveHighlight();
+			}
+			yield break;
+		}
+		yield return null;
 	}
 
 	private void GenerateStars() {
@@ -130,45 +239,47 @@ public class SpaceTradersModule : MonoBehaviour {
 
 	private void AddHandlers() {
 		foreach (StarObject star in starByName.Values) {
-			KMSelectable selectable = star.GetComponent<KMSelectable>();
-			MapGenerator.CellStar cell = star.cell;
-			SpaceTradersModule self = this;
-			selectable.OnInteract = () => {
-				if (
-					cell.adjacentStars.Count() != 1
-					|| cell.name == MapGenerator.SUN_NAME
-					|| _submittedStars.Contains(cell.name)
-					|| soldGoodsCount == goodsToBeSoldCount
-				) {
-					Audio.PlaySoundAtTransform("NotOutskirts", selectable.transform);
-					return false;
-				}
-				Debug.LogFormat("[Space Traders #{0}] Pressed star: {1}", _moduleId, cell.name);
-				Debug.LogFormat("[Space Traders #{0}] Current time: {1}", _moduleId, BombInfo.GetFormattedTime());
-				Debug.LogFormat("[Space Traders #{0}] Path: {1}", _moduleId, cell.path.Select((c) => c.name).Join(","));
-				IEnumerable<MapGenerator.CellStar> starsWithTax = cell.path.Where((s) => StarData.HasTaxAt(s, self));
-				Debug.LogFormat("[Space Traders #{0}] Stars with tax: {1}", _moduleId,
-					starsWithTax.Select((c) => c.name).Join(","));
-				int tax = starsWithTax.Select((s) => s.tax).Sum();
-				Debug.LogFormat("[Space Traders #{0}] Required tax: {1}", _moduleId, tax);
-				if (tax > maxTax) {
-					Debug.LogFormat("[Space Traders #{0}] Required tax greater than maximum allowed", _moduleId);
-					BombModule.HandleStrike();
-					Debug.LogFormat("[Space Traders #{0}] Reseting module", _moduleId);
-					ResetModule(true);
-				} else {
-					Audio.PlaySoundAtTransform("StarSubmitted", selectable.transform);
-					soldGoodsCount += 1;
-					Debug.LogFormat("[Space Traders #{0}] Sold products count: {1}/{2}", _moduleId, soldGoodsCount,
-						goodsToBeSoldCount);
-					_submittedStars.Add(cell.name);
-					foreach (StarObject pathStar in cell.path.Select((pathCell) => starByName[pathCell.name])) {
-						pathStar.HypercorridorToSun.GetComponent<Renderer>().material = UsedHypercorridorMaterial;
-					}
-				}
+			star.GetComponent<KMSelectable>().OnInteract += () => {
+				OnStarPressed(star);
 				return false;
 			};
 		}
+	}
+
+	private bool OnStarPressed(StarObject star) {
+		if (
+			star.cell.adjacentStars.Count() != 1
+			|| star.cell.name == MapGenerator.SUN_NAME
+			|| _submittedStars.Contains(star.cell.name)
+			|| soldGoodsCount == goodsToBeSoldCount
+		) {
+			Audio.PlaySoundAtTransform("NotOutskirts", star.transform);
+			return true;
+		}
+		Debug.LogFormat("[Space Traders #{0}] Pressed star: {1}", _moduleId, star.cell.name);
+		Debug.LogFormat("[Space Traders #{0}] Current time: {1}", _moduleId, BombInfo.GetFormattedTime());
+		Debug.LogFormat("[Space Traders #{0}] Path: {1}", _moduleId, star.cell.path.Select((c) => c.name).Join(","));
+		IEnumerable<MapGenerator.CellStar> starsWithTax = star.cell.path.Where((s) => StarData.HasTaxAt(s, this));
+		Debug.LogFormat("[Space Traders #{0}] Stars with tax: {1}", _moduleId,
+			starsWithTax.Select((c) => c.name).Join(","));
+		int tax = starsWithTax.Select((s) => s.tax).Sum();
+		Debug.LogFormat("[Space Traders #{0}] Required tax: {1}", _moduleId, tax);
+		if (tax > maxTax) {
+			Debug.LogFormat("[Space Traders #{0}] Required tax greater than maximum allowed", _moduleId);
+			BombModule.HandleStrike();
+			Debug.LogFormat("[Space Traders #{0}] Reseting module", _moduleId);
+			ResetModule(true);
+			return false;
+		}
+		Audio.PlaySoundAtTransform("StarSubmitted", star.transform);
+		soldGoodsCount += 1;
+		Debug.LogFormat("[Space Traders #{0}] Sold products count: {1}/{2}", _moduleId, soldGoodsCount,
+			goodsToBeSoldCount);
+		_submittedStars.Add(star.cell.name);
+		foreach (StarObject pathStar in star.cell.path.Select((pathCell) => starByName[pathCell.name])) {
+			pathStar.HypercorridorToSun.GetComponent<Renderer>().material = UsedHypercorridorMaterial;
+		}
+		return true;
 	}
 
 	public void ResetModule(bool generateNewRegimes = false) {

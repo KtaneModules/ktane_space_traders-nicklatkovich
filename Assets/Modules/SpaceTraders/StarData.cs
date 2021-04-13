@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEngine;
 using KModkit;
@@ -70,9 +71,20 @@ public static class StarData {
 
 	public static readonly Dictionary<string, int> regimeId = new Dictionary<string, int>();
 
+	private static readonly Dictionary<string, string> _lowerToActual = new Dictionary<string, string>();
+
 	static StarData() {
 		for (int i = 0; i < raceNames.Length; i++) raceId[raceNames[i]] = i;
 		for (int i = 0; i < regimeNames.Length; i++) regimeId[regimeNames[i]] = i + raceNames.Length;
+		foreach (string starName in _data.Keys) _lowerToActual.Add(starName.ToLower().Split(' ').Join(""), starName);
+	}
+
+	public static bool HasLowerCasedStarName(string lowercased) {
+		return _lowerToActual.ContainsKey(lowercased);
+	}
+
+	public static string LowerCasedStarNameToActual(string lowercased) {
+		return _lowerToActual[lowercased];
 	}
 
 	public static char GetRaceType(MapGenerator.CellStar star) {

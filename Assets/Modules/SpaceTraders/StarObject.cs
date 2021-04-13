@@ -26,9 +26,6 @@ public class StarObject : MonoBehaviour {
 	public TextMesh RegimeNameMesh;
 	public TextMesh TaxMesh;
 
-	private bool _sold = false;
-	public bool sold { get { return _sold; } }
-
 	private MapGenerator.CellStar _cell;
 	public MapGenerator.CellStar cell {
 		get { return _cell; }
@@ -38,6 +35,16 @@ public class StarObject : MonoBehaviour {
 			RaceNameMesh.text = string.Format("Race: {0}", cell.race);
 			RegimeNameMesh.text = string.Format("Regime: {0}", cell.regime);
 			TaxMesh.text = string.Format("Tax: {0} GCr", cell.tax.ToString());
+		}
+	}
+
+	private bool _disabled = false;
+	public bool disabled {
+		get { return _disabled; }
+		set {
+			if (_disabled == value) return;
+			_disabled = value;
+			if (disabled) RemoveHighlight();
 		}
 	}
 
@@ -59,19 +66,20 @@ public class StarObject : MonoBehaviour {
 		Halo.color = GetRandomStarColor();
 		KMSelectable selfSelectable = GetComponent<KMSelectable>();
 		InfoPanel.transform.localScale = Vector3.zero;
-		selfSelectable.OnHighlight += () => {
-			if (_sold) return;
-			InfoPanel.transform.localScale = Vector3.one;
-			Vector3 offset = new Vector3(0f, 0f, -Mathf.Sign(transform.localPosition.z) * INFO_PANEL_OFFSET);
-			offset.x -= Mathf.Min(0f, transform.localPosition.x - INFO_PANEL_WIDTH + .08f) * 200f;
-			offset.x -= Mathf.Max(0f, transform.localPosition.x + INFO_PANEL_WIDTH - .08f) * 200f;
-			InfoPanel.transform.localPosition = transform.localPosition + offset + INFO_PANEL_POSITION;
-		};
-		selfSelectable.OnHighlightEnded += () => InfoPanel.transform.localScale = Vector3.zero;
+		selfSelectable.OnHighlight += Highlight;
+		selfSelectable.OnHighlightEnded += RemoveHighlight;
 	}
 
-	public void Sell() {
-		_sold = true;
+	public void Highlight() {
+		if (disabled) return;
+		InfoPanel.transform.localScale = Vector3.one;
+		Vector3 offset = new Vector3(0f, 0f, -Mathf.Sign(transform.localPosition.z) * INFO_PANEL_OFFSET);
+		offset.x -= Mathf.Min(0f, transform.localPosition.x - INFO_PANEL_WIDTH + .08f) * 200f;
+		offset.x -= Mathf.Max(0f, transform.localPosition.x + INFO_PANEL_WIDTH - .08f) * 200f;
+		InfoPanel.transform.localPosition = transform.localPosition + offset + INFO_PANEL_POSITION;
+	}
+
+	public void RemoveHighlight() {
 		InfoPanel.transform.localScale = Vector3.zero;
 	}
 }

@@ -117,7 +117,6 @@ public static class MapGenerator {
 		int[] maxPathsTaxes = stars.Select((s) => (
 			s.path.Where((p) => StarData.HasTaxOnGenerationAt(p, module)).Select((p) => p.tax).Sum())
 		).ToArray();
-		Debug.Log(maxPathsTaxes);
 		System.Array.Sort(maxPathsTaxes);
 		int i = maxPathsTaxes.Length / 2;
 		int _maxTax = maxPathsTaxes[i];
