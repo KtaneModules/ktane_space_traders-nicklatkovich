@@ -110,7 +110,7 @@ public class SpaceTradersModule : MonoBehaviour {
 		if (command == "outskirts") {
 			foreach (StarObject star in starByName.Values) {
 				if (star.cell.adjacentStars.Count != 1 || star.cell.name == MapGenerator.SUN_NAME) continue;
-				yield return new WaitForSeconds(.1f);
+				yield return null;
 				if (TwitchShouldCancelCommand) {
 					yield return "cancelled";
 					yield break;
@@ -135,7 +135,7 @@ public class SpaceTradersModule : MonoBehaviour {
 			}
 			StarObject target = starByName[StarData.LowerCasedStarNameToActual(starName)];
 			foreach (MapGenerator.CellStar cell in target.cell.path) {
-				yield return new WaitForSeconds(.1f);
+				yield return null;
 				if (TwitchShouldCancelCommand) {
 					yield return "cancelled";
 					yield break;
@@ -181,7 +181,7 @@ public class SpaceTradersModule : MonoBehaviour {
 				yield break;
 			}
 			foreach (string starName in starsName) {
-				yield return new WaitForSeconds(.1f);
+				yield return null;
 				if (TwitchShouldCancelCommand) {
 					yield return "cancelled";
 					yield break;
