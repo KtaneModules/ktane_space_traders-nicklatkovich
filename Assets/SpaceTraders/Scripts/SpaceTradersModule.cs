@@ -4,13 +4,31 @@ using System.Linq;
 using UnityEngine;
 
 public class SpaceTradersModule : MonoBehaviour {
-	public const int GRID_WIDHT = 10;
-	public const int GRID_HEIGHT = 10;
-	public const float CELL_SIZE = .015f;
-	public const float STAR_MIN_HEIGHT = .015f;
-	public const float STAR_MAX_HEIGHT = .055f;
+	private const int GRID_WIDHT = 10;
+	private const int GRID_HEIGHT = 10;
+	private const float CELL_SIZE = .015f;
+	private const float STAR_MIN_HEIGHT = .015f;
+	private const float STAR_MAX_HEIGHT = .055f;
 
-	private static int _moduleIdCounter = 1;
+	private static int moduleIdCounter = 1;
+
+	private static int[] GenerateSouvenirQuestion(int correctAnswer, int min, int max, int maxStep) {
+		int minResult = correctAnswer;
+		int maxResult = correctAnswer;
+		int[] result = new int[5];
+		int discentsCount = Random.Range(0, 5);
+		for (int i = 0; i < 5; i++) {
+			int diff = Random.Range(1, maxStep + 1);
+			if (discentsCount > i && minResult - diff >= min) {
+				minResult -= diff;
+				result[i] = minResult;
+			} else if (maxResult + diff <= max) {
+				maxResult += diff;
+				result[i] = maxResult;
+			} else return result;
+		}
+		return result;
+	}
 
 	public GameObject HypercorridorPrefab;
 	public GameObject StarsContainer;
@@ -40,13 +58,22 @@ public class SpaceTradersModule : MonoBehaviour {
 	private HashSet<string> _submittedStars = new HashSet<string>();
 	public HashSet<string> submittedStars { get { return new HashSet<string>(_submittedStars); } }
 
+	public int maxPossibleTaxAmount { get { return starByName.Values.Select(s => s.cell.path.Count).Max(); } }
+
 	private int _startingMinutes;
 	public int startingMinutes { get { return _startingMinutes; } }
 
 	private bool _solved = false;
-	public bool solved { get { return _solved; } }
+	public bool solved {
+		get { return _solved; }
+		private set {
+			if (_solved == value) return;
+			_solved = value;
+			if (solved) ShipPowerTextMesh.text = GoodsTextMesh.text = "";
+		}
+	}
 
-	private bool _forceSolved = false;
+	private bool _forceSolved = true;
 	public bool forceSolved { get { return _forceSolved; } }
 
 	private int _maxTax;
@@ -58,22 +85,22 @@ public class SpaceTradersModule : MonoBehaviour {
 		}
 	}
 
-	private int _goodsToBeSoldCount;
-	public int goodsToBeSoldCount {
-		get { return _goodsToBeSoldCount; }
+	private int _productsCountToBeSold;
+	public int productsCountToBeSold {
+		get { return _productsCountToBeSold; }
 		private set {
-			_goodsToBeSoldCount = value;
-			GoodsTextMesh.text = string.Format(@"{0}/{1}", soldGoodsCount, goodsToBeSoldCount);
+			_productsCountToBeSold = value;
+			GoodsTextMesh.text = string.Format(@"{0}/{1}", soldProductsCount, productsCountToBeSold);
 		}
 	}
 
-	private int _soldGoodsCount;
-	public int soldGoodsCount {
-		get { return _soldGoodsCount; }
+	private int _soldProductsCount;
+	public int soldProductsCount {
+		get { return _soldProductsCount; }
 		private set {
-			_soldGoodsCount = value;
-			GoodsTextMesh.text = string.Format(@"{0}/{1}", soldGoodsCount, goodsToBeSoldCount);
-			if (soldGoodsCount > 0 && soldGoodsCount >= goodsToBeSoldCount) OnSolved();
+			_soldProductsCount = value;
+			GoodsTextMesh.text = string.Format(@"{0}/{1}", soldProductsCount, productsCountToBeSold);
+			if (soldProductsCount > 0 && soldProductsCount >= productsCountToBeSold) OnSolved();
 		}
 	}
 
@@ -85,7 +112,7 @@ public class SpaceTradersModule : MonoBehaviour {
 	private List<GameObject> _hypercorridors = new List<GameObject>();
 
 	private void Start() {
-		_moduleId = _moduleIdCounter++;
+		_moduleId = moduleIdCounter++;
 		GenerateStars();
 		ResetModule();
 		BombModule.OnActivate += () => Activate();
@@ -201,7 +228,6 @@ public class SpaceTradersModule : MonoBehaviour {
 	public void TwitchHandleForcedSolve() {
 		if (solved) return;
 		Debug.LogFormat("[Space Traders #{0}] Module force-solved", _moduleId);
-		_forceSolved = true;
 		foreach (StarObject star in starByName.Values.Where((s) => s.cell.adjacentStars.Count == 1)) {
 			int requiredTax = star.cell.path.Where((c) => StarData.HasTaxAt(c, this)).Select((c) => c.tax).Sum();
 			if (requiredTax <= maxTax) {
@@ -210,7 +236,7 @@ public class SpaceTradersModule : MonoBehaviour {
 				}
 			}
 		}
-		soldGoodsCount = goodsToBeSoldCount;
+		soldProductsCount = productsCountToBeSold;
 	}
 
 	private void GenerateStars() {
@@ -292,9 +318,10 @@ public class SpaceTradersModule : MonoBehaviour {
 			return false;
 		}
 		Audio.PlaySoundAtTransform("StarSubmitted", star.transform);
-		soldGoodsCount += 1;
-		Debug.LogFormat("[Space Traders #{0}] Sold products count: {1}/{2}", _moduleId, soldGoodsCount,
-			goodsToBeSoldCount);
+		if (soldProductsCount + 1 == productsCountToBeSold) _forceSolved = false;
+		soldProductsCount += 1;
+		Debug.LogFormat("[Space Traders #{0}] Sold products count: {1}/{2}", _moduleId, soldProductsCount,
+			productsCountToBeSold);
 		_submittedStars.Add(star.cell.name);
 		foreach (StarObject pathStar in star.cell.path.Select((pathCell) => starByName[pathCell.name])) {
 			pathStar.HypercorridorToSun.GetComponent<Renderer>().material = UsedHypercorridorMaterial;
@@ -310,7 +337,7 @@ public class SpaceTradersModule : MonoBehaviour {
 		List<StarObject> stars = starByName.Values.ToList();
 		HashSet<MapGenerator.CellStar> cells = new HashSet<MapGenerator.CellStar>(stars.Select((s) => s.cell));
 		if (generateNewRegimes) {
-			soldGoodsCount = 0;
+			soldProductsCount = 0;
 			foreach (MapGenerator.CellStar cell in cells) {
 				string newRegime = StarData.regimeNames.PickRandom();
 				if (cell.regime == newRegime) continue;
@@ -340,11 +367,11 @@ public class SpaceTradersModule : MonoBehaviour {
 			}
 		)).Where((d) => d.tax <= _maxTax).Select((d) => d.name).Join(","));
 		maxTax = _maxTax;
-		goodsToBeSoldCount = _goodsToBeSoldCount;
+		productsCountToBeSold = _goodsToBeSoldCount;
 	}
 
 	private void OnSolved() {
-		_solved = true;
+		solved = true;
 		foreach (StarObject star in starByName.Values) star.disabled = true;
 		BombModule.HandlePass();
 	}
