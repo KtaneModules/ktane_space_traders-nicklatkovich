@@ -13,10 +13,6 @@ Assets/Editor/*
 !Assets/Editor/Resources.meta
 !Assets/Editor/Resources/
 
-!Assets/Modules.meta
-!Assets/Modules/
-Assets/Modules/*
-
 Manual/Template Manual.html
 Manual/css/
 Manual/font/
@@ -32,8 +28,8 @@ obj/
 Models/*
 
 # SpaceTraders
-!Assets/Modules/SpaceTraders.meta
-!Assets/Modules/SpaceTraders
+!Assets/SpaceTraders.meta
+!Assets/SpaceTraders
 !Manual/img/Component/Space Traders.svg
 !Manual/img/Space Traders/
 !Models/SpaceTraders.blend
