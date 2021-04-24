@@ -17,6 +17,6 @@ MonoBehaviour:
   description: "[h1]About[/h1]\r\nThe module in which you need to find all profitable
     trade routes on a randomly generated 3D star map.\r\n\r\n[h1]Manual[/h1]\r\n[url=https://ktane.timwi.de/HTML/Space%20Traders.html]HTML[/url]\r\n[url=https://ktane.timwi.de/PDF/Space%20Traders.pdf]PDF[/url]\r\n\r\n[h1]Module
     ID[/h1]\r\n[code]space_traders[/code]"
-  version: 0.1.0
+  version: 0.2.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: db14c2e88b583b64a9700ea30ec919b6, type: 3}
