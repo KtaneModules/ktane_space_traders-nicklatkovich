@@ -135,18 +135,20 @@ public class SpaceTradersModule : MonoBehaviour {
 	public IEnumerator ProcessTwitchCommand(string command) {
 		command = command.Trim().ToLower();
 		if (command == "outskirts") {
-			foreach (StarObject star in starByName.Values) {
-				if (star.cell.adjacentStars.Count != 1 || star.cell.name == MapGenerator.SUN_NAME) continue;
-				yield return null;
-				if (TwitchShouldCancelCommand) {
-					yield return "cancelled";
-					yield break;
-				}
+			IEnumerable<StarObject> stars = starByName.Values.Where(s => s.cell.adjacentStars.Count == 1 && s.cell.name != MapGenerator.SUN_NAME);
+			yield return null;
+			if (stars.Count() > 3) yield return "waiting music";
+			foreach (StarObject star in stars) {
 				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(true);
 				star.Highlight();
 				yield return new WaitForSeconds(5f);
 				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(false);
 				star.RemoveHighlight();
+				yield return null;
+				if (TwitchShouldCancelCommand) {
+					yield return "cancelled";
+					yield break;
+				}
 			}
 			yield break;
 		}
@@ -161,18 +163,20 @@ public class SpaceTradersModule : MonoBehaviour {
 				yield break;
 			}
 			StarObject target = starByName[StarData.LowerCasedStarNameToActual(starName)];
+			yield return null;
+			if (target.cell.path.Count > 3) yield return "waiting music";
 			foreach (MapGenerator.CellStar cell in target.cell.path) {
-				yield return null;
-				if (TwitchShouldCancelCommand) {
-					yield return "cancelled";
-					yield break;
-				}
 				StarObject star = starByName[cell.name];
 				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(true);
 				star.Highlight();
 				yield return new WaitForSeconds(5f);
 				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(false);
 				star.RemoveHighlight();
+				yield return null;
+				if (TwitchShouldCancelCommand) {
+					yield return "cancelled";
+					yield break;
+				}
 			}
 			yield break;
 		}
@@ -207,18 +211,20 @@ public class SpaceTradersModule : MonoBehaviour {
 				);
 				yield break;
 			}
+			yield return null;
+			if (starsName.Count() > 3) yield return "waiting music";
 			foreach (string starName in starsName) {
-				yield return null;
-				if (TwitchShouldCancelCommand) {
-					yield return "cancelled";
-					yield break;
-				}
 				StarObject star = starByName[StarData.LowerCasedStarNameToActual(starName)];
 				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(true);
 				star.Highlight();
 				yield return new WaitForSeconds(5f);
 				star.GetComponent<KMSelectable>().Highlight.transform.GetChild(0).gameObject.SetActive(false);
 				star.RemoveHighlight();
+				yield return null;
+				if (TwitchShouldCancelCommand) {
+					yield return "cancelled";
+					yield break;
+				}
 			}
 			yield break;
 		}
