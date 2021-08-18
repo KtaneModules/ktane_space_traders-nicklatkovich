@@ -106,6 +106,7 @@ public class SpaceTradersModule : MonoBehaviour {
 
 	public int remainingMinutesCount { get { return Mathf.FloorToInt(BombInfo.GetTime() / 60f); } }
 
+	private bool activated = false;
 	private int _moduleId;
 	public int moduleId { get { return _moduleId; } }
 
@@ -117,6 +118,12 @@ public class SpaceTradersModule : MonoBehaviour {
 		ResetModule();
 		BombModule.OnActivate += () => Activate();
 		AddHandlers();
+		StartCoroutine(ProcessNextFrame());
+	}
+
+	private IEnumerator ProcessNextFrame() {
+		yield return null;
+		foreach (StarObject star in starByName.Values) star.UpdateHaloSize();
 	}
 
 	private void Activate() {
@@ -130,9 +137,14 @@ public class SpaceTradersModule : MonoBehaviour {
 		}).ToArray();
 		selfSelectable.UpdateChildren();
 		GenerateMaxTaxAndGoodsToSoldCount();
+		activated = true;
 	}
 
 	public IEnumerator ProcessTwitchCommand(string command) {
+		if (!activated) {
+			yield return "sendtochat {0}, !{1} not activated";
+			yield break;
+		}
 		command = command.Trim().ToLower();
 		if (command == "outskirts") {
 			IEnumerable<StarObject> stars = starByName.Values.Where(s => s.cell.adjacentStars.Count == 1 && s.cell.name != MapGenerator.SUN_NAME);

@@ -2,6 +2,7 @@
 using UnityEngine;
 
 public class StarObject : MonoBehaviour {
+	public const float HALO_RANGE = 1.5f;
 	public const float INFO_PANEL_OFFSET = 7f;
 	public const float INFO_PANEL_WIDTH = .05f;
 
@@ -68,6 +69,10 @@ public class StarObject : MonoBehaviour {
 		InfoPanel.transform.localScale = Vector3.zero;
 		selfSelectable.OnHighlight += Highlight;
 		selfSelectable.OnHighlightEnded += RemoveHighlight;
+	}
+
+	public void UpdateHaloSize() {
+		Halo.range = transform.lossyScale.magnitude * HALO_RANGE;
 	}
 
 	public void Highlight() {
